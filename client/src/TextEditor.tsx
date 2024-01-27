@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import Quill, { TextChangeHandler } from 'quill';
-import Delta from 'quill';
 import 'quill/dist/quill.snow.css';
 import { useParams } from 'react-router-dom';
-import useWebSocket,{ReadyState} from 'react-use-websocket';
-const SAVE_INTERVAL_MS = 2000
+import useWebSocket, { ReadyState } from 'react-use-websocket';
+
+const SAVE_INTERVAL_MS = 2000;
 const TOOLBAR_OPTIONS = [
   [{ header: [1, 2, 3, 4, 5, 6, false] }],
   [{ font: [] }],
@@ -16,15 +16,21 @@ const TOOLBAR_OPTIONS = [
   ['image', 'blockquote', 'code-block'],
   ['clean'],
 ] as any;
+
 const WebSocketURL = "ws://localhost:3001";
 
 const TextEditor = () => {
   const { id: documentId } = useParams<{ id: string }>();
   const [quill, setQuill] = useState<Quill | null>(null);
-  const [socketUrl, setSocketUrl] = useState(WebSocketURL);
-  const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl);
+  const [getDocumentSent, setGetDocumentSent] = useState(false);
+  const { sendMessage, lastMessage} = useWebSocket(WebSocketURL);
+  useEffect(() => {
+    if (!getDocumentSent) {
+      sendMessage(JSON.stringify({ type: "get-document", payload: { docId: documentId } }));
+      setGetDocumentSent(true);
+    }
+  }, [documentId, sendMessage, getDocumentSent]);
 
-  //connect to socket
   useEffect(() => {
     if (!quill || !lastMessage) return;
 
@@ -33,50 +39,60 @@ const TextEditor = () => {
     if (message.type === 'receive-changes') {
       quill.updateContents(message.payload);
     }
+    else if (message.type === 'load-document'){
+      quill.setContents(message.payload);
+    }
   }, [quill, lastMessage]);
 
-  
   useEffect(() => {
     if (!quill) return;
-    
-    quill.on('text-change', function(delta,oldDelta,source){
+
+    const interval = setInterval(() => {
+      const data = {
+        type: "save-document",
+        payload: {
+          docId : documentId,
+          data : quill.getContents()
+        },
+      };
+
+      sendMessage(JSON.stringify(data));
+    }, SAVE_INTERVAL_MS);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [quill, sendMessage]);
+
+  useEffect(() => {
+    if (!quill) return;
+    const handler = function handle(delta:any,oldDelta:any,source:any){
       if (source !== "user") return;
       const data = {
-        type: "send-changes", payload: delta
-      }
+        type: "send-changes",
+        payload: {
+          docId:documentId,
+          data:delta
+        }
+      };
       sendMessage(JSON.stringify(data));
-    });
-  }, [sendMessage, quill,lastMessage]);
-
-
-  //Send doc changes
-  // useEffect(() => {
-  //   if (lastMessage == null || quill == null) return;
-
-  //   const handler:TextChangeHandler = (delta, source:any) => {
-  //     if (source !== "user") return;
-  //     sendMessage(JSON.stringify({ type: "send-changes", payload: delta }));
-  //   };
-
-  //   quill.on("text-change", handler);
-
-  //   return () => {
-  //     quill.off("text-change", handler);
-  //   };
-  // }, [lastMessage, quill]);
-
-
+    }
+    quill.on('text-change',handler);
+    return ()=>{
+      quill.off('text-change',handler);
+    }
+  }, [sendMessage, quill]);
 
   const wrapperRef = useCallback((wrapper: any) => {
-      if (wrapper == null) return;
-      wrapper.innerHTML = '';
-      const editor = document.createElement('div');
-      wrapper.append(editor);
-      const q = new Quill(editor, { theme: 'snow', modules: { toolbar: TOOLBAR_OPTIONS } });
-      setQuill(q);
-    }, []);
+    if (wrapper == null) return;
+    wrapper.innerHTML = '';
+    const editor = document.createElement('div');
+    wrapper.append(editor);
+    const q = new Quill(editor, { theme: 'snow', modules: { toolbar: TOOLBAR_OPTIONS } });
+    setQuill(q);
+  }, []);
 
-    return <div className="container" ref={wrapperRef}></div>;
+  return <div className="container" ref={wrapperRef}></div>;
 };
 
 export default TextEditor;

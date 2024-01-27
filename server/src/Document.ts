@@ -1,10 +1,10 @@
 import { Schema, model } from "mongoose"
 
-const Document = new Schema({
+const DocumentModel = new Schema({
   _id: {
     type:String,
   },
   data: Object,
 })
 
-export default model("Document", Document);
+export default model("Document", DocumentModel);
