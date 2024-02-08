@@ -23,7 +23,8 @@ This is a Google Docs clone built using React, Vite, Express.js, and WebSockets.
 
 ## Demo
 
-Check out the demo video: [Demo Video](./Demo-video.mp4)
+Check out the demo video: [Demo Video](https://github.com/Raman-79/docs-clone/assets/118994443/8e74f892-3bff-4319-b93d-d0bc5203372e
+)
 
 ## Technologies Used
 
@@ -33,17 +34,10 @@ Check out the demo video: [Demo Video](./Demo-video.mp4)
 - WebSockets
 - MongoDB (optional, for storing user data)
 
-## Contributing
 
-Contributions are welcome! Please follow the guidelines in [CONTRIBUTING.md](./CONTRIBUTING.md).
-
-## License
-
-This project is licensed under the [MIT License](./LICENSE).
 
 1. Open your browser and navigate to `http://localhost:3000`
-2. Sign up or log in to create or access your documents
-3. Start collaborating with others in real-time
+2. Start collaborating with others in real-time
 
 ## Technologies Used
 
@@ -53,10 +47,3 @@ This project is licensed under the [MIT License](./LICENSE).
 - WebSockets
 - MongoDB (optional, for storing user data)
 
-## Contributing
-
-Contributions are welcome! Please follow the guidelines in [CONTRIBUTING.md](./CONTRIBUTING.md).
-
-## License
-
-This project is licensed under the [MIT License](./LICENSE).
