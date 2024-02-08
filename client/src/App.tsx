@@ -6,7 +6,7 @@ import {
    Redirect
  } from "react-router-dom";
  import { v4 as uuidV4 } from 'uuid';
-import './App.css'
+import Register from './Register';
 function App() {
    return (
       <BrowserRouter>
@@ -16,6 +16,9 @@ function App() {
         </Route>
         <Route path="/doc/:id">
           <TextEditor />
+        </Route>
+        <Route path="/register">
+          <Register />
         </Route>
       </Switch>
       </BrowserRouter>

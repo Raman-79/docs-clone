@@ -9,6 +9,8 @@ import mongoose from 'mongoose';
 
 const app = express();
 const port = 3001;
+
+
 mongoose.connect("mongodb://127.0.0.1:27017/google-docs").then(()=>{
     console.log("Connected to db");
 })
@@ -16,12 +18,24 @@ mongoose.connect("mongodb://127.0.0.1:27017/google-docs").then(()=>{
     console.log("Error in database", err);
 }) 
 
-
 app.use(cors({
         origin: 'http://localhost:5173',
         methods: ['GET', 'POST']
-}))
-const defaultValue = "";   
+}));
+
+app.post("/register", (req:Request, res) => {
+const {name} = req.body;
+console.log("Name",name);
+if(name){
+    res.json({message: "Registered successfully"}).status(200);
+}
+else {
+    res.json({message: "Error in registration"}).status(400);
+}
+});
+const defaultValue = "";
+
+//Room logic
 class Room{
     private clients: Set<WebSocket>;
     constructor(){
@@ -44,10 +58,14 @@ class Room{
         return this.clients;
     }
 }
+
+
 const rooms = new Map<string, Room>();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
+
+//Ws logic
 wss.on('connection', (ws: WebSocket) => {    
     ws.on('message', async (message: any) => {
         const parsedMessage = JSON.parse(message);
@@ -95,6 +113,10 @@ wss.on('connection', (ws: WebSocket) => {
 }); 
 
 server.listen(port);
+
+
+//Document creation
+
 async function findOrCreateDocument(id: string) {
     try {
         if (id == null) return;
@@ -107,4 +129,3 @@ async function findOrCreateDocument(id: string) {
         console.error("Error in findOrCreateDocument:", error);
     }
 }
-

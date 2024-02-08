@@ -31,7 +31,18 @@ app.use((0, cors_1.default)({
     origin: 'http://localhost:5173',
     methods: ['GET', 'POST']
 }));
+app.post("/register", (req, res) => {
+    const { name } = req.body;
+    console.log("Name", name);
+    if (name) {
+        res.json({ message: "Registered successfully" }).status(200);
+    }
+    else {
+        res.json({ message: "Error in registration" }).status(400);
+    }
+});
 const defaultValue = "";
+//Room logic
 class Room {
     constructor() {
         this.clients = new Set();
@@ -56,6 +67,7 @@ class Room {
 const rooms = new Map();
 const server = http_1.default.createServer(app);
 const wss = new ws_1.WebSocketServer({ server });
+//Ws logic
 wss.on('connection', (ws) => {
     ws.on('message', (message) => __awaiter(void 0, void 0, void 0, function* () {
         const parsedMessage = JSON.parse(message);
@@ -100,6 +112,7 @@ wss.on('connection', (ws) => {
     }));
 });
 server.listen(port);
+//Document creation
 function findOrCreateDocument(id) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
